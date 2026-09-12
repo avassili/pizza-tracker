@@ -1,0 +1,10 @@
+{
+"name": "Pizza Tracker Dev Container",
+"image": "mcr.microsoft.com/devcontainers/javascript-node:1-20-bullseye",
+    "customizations": {
+        "vscode": {
+        "settings": {},
+        "extensions": []
+        }
+    }
+}
