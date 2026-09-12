@@ -1,10 +1,40 @@
 {
-"name": "Pizza Tracker Dev Container",
-"image": "mcr.microsoft.com/devcontainers/javascript-node:1-20-bullseye",
-    "customizations": {
-        "vscode": {
-        "settings": {},
-        "extensions": []
-        }
+  "name": "Node.js & Yarn (VSCodium)",
+  // Uses the official universal dev container base image for JavaScript/Node
+  "image": "://microsoft.com",
+
+  // Features let you easily inject extra tools if needed
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {}
+  },
+
+  // Environment configurations inside the container
+  "containerEnv": {
+    "NODE_ENV": "development"
+  },
+
+  // Configure VSCodium-specific workspace settings and extensions
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+      },
+      // Ensure these extensions exist on Open VSX for VSCodium
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ]
     }
+  },
+
+  // Use 'forwardPorts' to expose common frontend/backend ports to your local host
+  "forwardPorts": [3000, 5173],
+
+  // Automatically trigger Yarn to install dependencies after the container builds
+  "postCreateCommand": "yarn install",
+
+  // Connects as a secure non-root user built into the base image
+  "remoteUser": "node"
 }
