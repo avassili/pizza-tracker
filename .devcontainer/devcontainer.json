@@ -1,5 +1,5 @@
 {
-  "name": "Node.js & Yarn (VSCodium)",
+  "name": "Pizza Tracker Tools",
   // Uses the official universal dev container base image for JavaScript/Node
   "image": "://microsoft.com",
 
