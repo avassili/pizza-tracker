@@ -1,40 +1,139 @@
 {
-  "name": "Node.js & Yarn (VSCodium)",
-  // Uses the official universal dev container base image for JavaScript/Node
-  "image": "://microsoft.com",
+  "name": "Pizza Tracker Local (Offline)",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  "shutdownAction": "stopCompose",
 
-  // Features let you easily inject extra tools if needed
   "features": {
-    "ghcr.io/devcontainers/features/git:1": {}
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": false,
+      "configureZshAsDefaultShell": false,
+      "installOhMyZsh": false,
+      "upgradePackages": true
+    },
+    "ghcr.io/devcontainers/features/git:1": {
+      "version": "latest",
+      "ppa": false
+    },
+    "ghcr.io/devcontainers/features/github-cli:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "version": "latest",
+      "moby": false,
+      "dockerDashComposeVersion": "v2"
+    },
+    "ghcr.io/devcontainers/features/aws-cli:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/azure-cli:1": {
+      "version": "latest",
+      "extensions": "account"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20",
+      "nodeGypDependencies": true
+    }
   },
 
-  // Environment configurations inside the container
   "containerEnv": {
-    "NODE_ENV": "development"
+    "NODE_ENV": "development",
+    "DYNAMODB_ENDPOINT": "http://dynamodb-local:8000",
+    "DYNAMODB_TABLE_NAME": "PizzaTrackerDev",
+    "AWS_REGION": "us-east-1",
+    "AWS_DEFAULT_REGION": "us-east-1",
+    "AWS_ACCESS_KEY_ID": "local_dev_key",
+    "AWS_SECRET_ACCESS_KEY": "local_dev_secret",
+    "AUTH_MODE": "mock",
+    "NOTIFICATION_DRIVER": "console",
+    "NEXT_TELEMETRY_DISABLED": "1"
   },
 
-  // Configure VSCodium-specific workspace settings and extensions
+  "forwardPorts": [3000, 5173, 8000],
+  "portsAttributes": {
+    "3000": {
+      "label": "Next.js App",
+      "onAutoForward": "notify"
+    },
+    "5173": {
+      "label": "Vite / Alt Frontend",
+      "onAutoForward": "silent"
+    },
+    "8000": {
+      "label": "DynamoDB Local",
+      "onAutoForward": "silent"
+    }
+  },
+
   "customizations": {
     "vscode": {
       "settings": {
         "terminal.integrated.defaultProfile.linux": "bash",
         "editor.formatOnSave": true,
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        },
+        "editor.tabSize": 2,
+        "files.eol": "\n",
+        "typescript.tsdk": "node_modules/typescript/lib",
+        "typescript.enablePromptUseWorkspaceTsdk": true,
+        "javascript.preferences.importModuleSpecifier": "non-relative",
+        "typescript.preferences.importModuleSpecifier": "non-relative",
+        "eslint.validate": [
+          "javascript",
+          "javascriptreact",
+          "typescript",
+          "typescriptreact"
+        ],
+        "tailwindCSS.experimental.classRegex": [
+          ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+          ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+        ],
+        "[typescript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[typescriptreact]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[javascript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[json]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[jsonc]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "aws.region": "us-east-1",
+        "docker.showStartPage": false
       },
-      // Ensure these extensions exist on Open VSX for VSCodium
       "extensions": [
         "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode"
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "bierner.markdown-mermaid",
+        "ms-azuretools.vscode-docker",
+        "ms-azuretools.vscode-containers",
+        "ms-vscode.azure-account",
+        "ms-azuretools.vscode-azureresourcegroups",
+        "ms-azuretools.vscode-azureappservice",
+        "ms-azuretools.vscode-azurefunctions",
+        "ms-azuretools.vscode-azurestorage",
+        "ms-azuretools.vscode-cosmosdb",
+        "AmazonWebServices.aws-toolkit-vscode",
+        "hashicorp.terraform",
+        "streetsidesoftware.code-spell-checker",
+        "usernamehw.errorlens",
+        "christian-kohler.path-intellisense",
+        "formulahendry.auto-rename-tag"
       ]
     }
   },
 
-  // Use 'forwardPorts' to expose common frontend/backend ports to your local host
-  "forwardPorts": [3000, 5173],
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "postStartCommand": "bash .devcontainer/init-dynamodb.sh",
 
-  // Automatically trigger Yarn to install dependencies after the container builds
-  "postCreateCommand": "yarn install",
-
-  // Connects as a secure non-root user built into the base image
   "remoteUser": "node"
 }

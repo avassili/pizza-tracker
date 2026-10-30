@@ -1,0 +1,36 @@
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/typescript-node:20
+    volumes:
+      - ..:/workspace:cached
+      # Persist bash history across rebuilds
+      - pizza-tracker-bashhistory:/commandhistory
+    working_dir: /workspace
+    command: sleep infinity
+    environment:
+      NODE_ENV: development
+      DYNAMODB_ENDPOINT: http://dynamodb-local:8000
+      DYNAMODB_TABLE_NAME: PizzaTrackerDev
+      AWS_REGION: us-east-1
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: local_dev_key
+      AWS_SECRET_ACCESS_KEY: local_dev_secret
+      AUTH_MODE: mock
+      NOTIFICATION_DRIVER: console
+      # Next.js
+      NEXT_TELEMETRY_DISABLED: "1"
+    ports:
+      - "3000:3000"
+      - "5173:5173"
+    depends_on:
+      - dynamodb-local
+
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    container_name: pizza-tracker-dynamodb-local
+    command: "-jar DynamoDBLocal.jar -sharedDb -inMemory -port 8000"
+    ports:
+      - "8000:8000"
+
+volumes:
+  pizza-tracker-bashhistory:
