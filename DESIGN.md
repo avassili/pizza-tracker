@@ -166,9 +166,11 @@ In development, `ConsoleNotificationChannel` intercepts messages and writes form
 
 | Attribute | Value |
 | --- | --- |
-| **PK** | `GSI1PK` → `TENANT#<id>#STATUS#<status>` |
-| **SK** | `GSI1SK` → `STEP#<stepKey>#TS#<isoTimestamp>` |
-| **Use Case** | Kitchen and Driver boards query active orders filtered by step. |
+| **PK** | `GSI1PK` → `TENANT#<id>#QUEUE#<bucket>` where `bucket` is `active` or `terminal` |
+| **SK** | `GSI1SK` → `STEP#<stepKey>#TS#<isoTimestamp>#ORDER#<orderId>` |
+| **Use Case** | Kitchen and Driver boards query active orders filtered by step via `begins_with(GSI1SK, "STEP#<stepKey>#TS#")`, oldest first. |
+
+> **Revised by `docs/TACTICAL-DESIGN.md` §4.1.** A `STATUS#<status>` partition would multiply partitions per status, make the queueing unstable across an `awaiting_input` cycle, and break cursor pagination when an item changes status. Two buckets keep the board query single-partition and let step filtering happen on the sort key.
 
 #### GSI2 (Public Token Deep-Link)
 
@@ -233,7 +235,7 @@ stateDiagram-v2
 
 #### Interactive Input Checkpoints
 
-- When staff triggers `requestInput(schemaKey)`, order status changes to `awaiting_input`.
+- When staff triggers `requestInput(schemaKey)`, the order sets `inputState.pending = true`. This is **not** a status and **not** a sixth step: `status` stays `active` and `stepKey` does not move. See `docs/TACTICAL-DESIGN.md` §2 and §6.
 - Normal step advancement is locked until the customer completes `submitInput()`.
 - The input result can automatically trigger `advance`, `restart`, or `loopback` based on tenant business rules.
 
@@ -261,7 +263,9 @@ export interface TenantConfig {
   };
   defaultLocale: string;
   i18n: Record<string, Record<string, string>>; // locale -> { key: translation }
-  stepPresentations: Record<StepKey, { titleKey: string; icon: string }>;
+  stepPresentations: Record<StepKey, { titleKey: string; detailKey: string; icon: string }>;
+  stepDurations: Record<StepKey, number>;      // seconds per step — drives the ETA
+  inputSchemas: Record<string, InputSchema>;   // structured customer decisions; see docs/TACTICAL-DESIGN.md §6
   rolePermissions: Record<string, string[]>;
   businessRules: {
     allowAdvanceWhileAwaitingInput: boolean;
@@ -274,10 +278,12 @@ export interface TenantConfig {
 
 | Role | Permissions |
 | --- | --- |
-| **Customer** | `order:read_public`, `input:submit_customer` |
-| **Kitchen Staff** | `order:read`, `step:advance:orderInProgress_Stage1`, `step:advance:orderInProgress_Stage2`, `step:restart:*`, `input:request` |
-| **Delivery Driver** | `order:read`, `step:advance:orderInProgress_Stage3`, `step:advance:orderComplete`, `input:request` |
-| **Store Manager** | Full permissions including `order:cancel` and tenant configuration updates |
+| **Customer** | `order:create`, `order:read_public`, `input:submit` |
+| **Kitchen Staff** | `order:read`, `step:advance:orderPlaced`, `step:advance:orderInProgress_Stage1`, `step:advance:orderInProgress_Stage2`, `step:restart:*`, `step:loopback:orderInProgress_Stage1`, `step:loopback:orderInProgress_Stage2`, `input:request` |
+| **Delivery Driver** | `order:read`, `step:advance:orderInProgress_Stage3`, `step:restart:orderInProgress_Stage3`, `step:loopback:orderInProgress_Stage3`, `input:request` |
+| **Store Manager** | Full explicit list: all of the above plus `order:cancel` and `tenant:config:write` |
+
+> **Normalized by `docs/TACTICAL-DESIGN.md` §9.** Wildcards are whole-segment only (`step:restart:*`), and a grant matches only when the segment count is equal, so `step:advance:*` cannot accidentally grant a bare `step:advance`. `step:advance:orderComplete` was removed: it would guard a transition *out of* the terminal step, which cannot exist.
 
 ---
 

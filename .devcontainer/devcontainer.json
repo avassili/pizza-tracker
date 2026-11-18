@@ -5,6 +5,15 @@
   "workspaceFolder": "/workspace",
   "shutdownAction": "stopCompose",
 
+  // Next.js dev server + DynamoDB Local (JVM) both want real memory; without
+  // this the "Create Container" flow will happily start on a 1 GB box and then
+  // get OOM-killed mid `npm install`.
+  "hostRequirements": {
+    "cpus": 2,
+    "memory": "4gb",
+    "storage": "32gb"
+  },
+
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2": {
       "installZsh": false,
@@ -50,15 +59,13 @@
     "NEXT_TELEMETRY_DISABLED": "1"
   },
 
-  "forwardPorts": [3000, 5173, 8000],
+  // DESIGN.md §3.2 specifies exactly these two ports. 5173 was removed: this
+  // stack is Next.js App Router only, there is no Vite dev server.
+  "forwardPorts": [3000, 8000],
   "portsAttributes": {
     "3000": {
       "label": "Next.js App",
       "onAutoForward": "notify"
-    },
-    "5173": {
-      "label": "Vite / Alt Frontend",
-      "onAutoForward": "silent"
     },
     "8000": {
       "label": "DynamoDB Local",
