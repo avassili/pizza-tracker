@@ -43,6 +43,9 @@ AC2: an unknown token returns null, not an error","docs/TACTICAL-DESIGN.md"
 AC2: re-running is idempotent","docs/TACTICAL-DESIGN.md"
 "PT-E0-F2-S09","Story","E0-F2-S09 scripts/seed-data.ts","PT-E0-F2","E0 - Platform and 5-step domain foundation","BO-1 BO-4 BO-5","M0","3","High","feature-backend epic-E0","backend","Why: local dev has every state to click through.","AC1: tenant acme plus four roles
 AC2: nine orders covering all steps, terminal states, pending input and a loopbacked ticket","docs/TACTICAL-DESIGN.md"
+"PT-E0-F2-S10","Story","E0-F2-S10 Create DynamoDB order structure and submit sample order","PT-E0-F2","E0 - Platform and 5-step domain foundation","BO-1 BO-4 BO-5","M0","3","High","feature-backend epic-E0","backend","Why: the database accepts a real order end-to-end.","AC1: scripts/init-db.ts provisions PizzaTrackerDev with PK/SK, GSI1, and GSI2 (PROVISIONED 5/5)
+AC2: orderRepository.createOrder writes order snapshot + ORDER_PLACED event atomically
+AC3: scripts/submit-sample-order.ts submits a sample order and verifies PK/SK and GSI2 reads","docs/TACTICAL-DESIGN.md"
 "PT-E0-F3","Feature","E0-F3 Frontend - session and tooling","PT-E0","E0 - Platform and 5-step domain foundation","BO-1 BO-4 BO-5","M0","","High","feature-frontend","frontend","Frontend - session and tooling for E0 - Platform and 5-step domain foundation.","","docs/TACTICAL-DESIGN.md"
 "PT-E0-F3-S01","Story","E0-F3-S01 Mock session from headers","PT-E0-F3","E0 - Platform and 5-step domain foundation","BO-1 BO-4 BO-5","M0","2","Medium","feature-frontend epic-E0","frontend","Why: role switching works offline.","AC1: x-mock-role and x-mock-tenant are read via awaited headers()
 AC2: missing headers fall back to customer/acme and the tenant is never a client argument","docs/TACTICAL-DESIGN.md"

@@ -60,7 +60,7 @@ Keys are contiguous and follow creation order:
 
 | Epic | Stories | Keys | Count |
 | --- | --- | --- | --- |
-| E0 | PT-E0-F1-S01 … F3-S03 | PTS-36 … PTS-56 | 21 |
+| E0 | PT-E0-F1-S01 … F3-S03, PT-E0-F2-S10 | PTS-36 … PTS-56, PTS-146 | 22 |
 | E1 | PT-E1-F1-S01 … F3-S04 | PTS-57 … PTS-71 | 15 |
 | E2 | PT-E2-F1-S01 … F3-S04 | PTS-72 … PTS-83 | 12 |
 | E3 | PT-E3-F1-S01 … F3-S03 | PTS-84 … PTS-93 | 10 |
